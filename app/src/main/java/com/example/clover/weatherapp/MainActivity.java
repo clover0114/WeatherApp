@@ -32,41 +32,19 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     private final int REQUEST_CODE_ADDCITY = 0;
-    private String cityTitle;
-    private String cityTag;
+    ListView lv_preflist = findViewById(R.id.lv_preflist);
+    List<Map<String, String>> cityList = new ArrayList<>();
 
     public int getREQUEST_CODE_ADDCITY() {
         return REQUEST_CODE_ADDCITY;
     }
 
-    public String getCityTitle() {
-        return cityTitle;
-    }
-
-    public String getCityTag() {
-        return cityTag;
-    }
-
-    public void setCityTitle(String cityTitle) {
-        this.cityTitle = cityTitle;
-    }
-
-    public void setCityTag(String cityTag) {
-        this.cityTag = cityTag;
-    }
-
-    //リストを生成
+    //空のリストを生成
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ListView lv_preflist = findViewById(R.id.lv_preflist);
-        List<Map<String, String>> cityList = new ArrayList<>();
-        Map<String, String> city = new HashMap<>();
-        city.put("cityTitle", getCityTitle());
-        city.put("cityTag", getCityTag());
-        cityList.add(city);
 
         String[] from = {"cityName"};
         int[] to = {android.R.id.text1};
@@ -75,19 +53,33 @@ public class MainActivity extends AppCompatActivity {
         lv_preflist.setOnItemClickListener(new onListItemSelectedListener());
     }
 
-    //addCityActivityからの戻りを受け取る
+    //addCityActivityからの戻りを受け取ったら、リストに都市を追加
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (requestCode == getREQUEST_CODE_ADDCITY() && resultCode == Activity.RESULT_OK){
             Bundle extras = data.getExtras();
-            setCityTitle(extras.getString("cityTitle"));
-            setCityTag(extras.getString("cityTag"));
-            Toast.makeText(MainActivity.this, getCityTitle(), Toast.LENGTH_LONG).show();
-            Toast.makeText(this, getCityTag(), Toast.LENGTH_LONG).show();
+
+            Map<String, String> city = new HashMap<>();
+            city.put("cityTitle", extras.getString("cityTitle"));
+            city.put("cityTag", extras.getString("cityTag"));
+            cityList.add(city);
+
+            String[] from = {"cityName"};
+            int[] to = {android.R.id.text1};
+            SimpleAdapter adapter = new SimpleAdapter(MainActivity.this, cityList, android.R.layout.simple_expandable_list_item_1, from, to);
+            lv_preflist.setAdapter(adapter);
+            lv_preflist.setOnItemClickListener(new onListItemSelectedListener());
+
+            /**
+             * test
+             */
+            Toast.makeText(this, "onActivityResult", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, extras.getString("cityTitle")
+                    + "と" + extras.getString("cityTag") + "が選択されました", Toast.LENGTH_SHORT).show(); //値がきてますテスト
         }
     }
 
-    //menu create
+    //メニューを生成
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -95,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
-    //menu itemListener
+    //メニューのアイテムを生成
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemId = item.getItemId();
@@ -108,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    //リストのリスナー
     private class onListItemSelectedListener implements android.widget.AdapterView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -118,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
             receiver.execute(cityTag);
         }
     }
+
 
     private class WeatherReceiver extends AsyncTask<String, String, String>{
         @Override

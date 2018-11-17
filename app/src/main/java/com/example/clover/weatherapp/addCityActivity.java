@@ -24,6 +24,24 @@ import java.util.Map;
 
 public class addCityActivity extends AppCompatActivity {
 
+    private static String cityTitle = "";
+    private static String cityTag = "";
+
+    public static void setCityTitle(String cityTitle) {
+        addCityActivity.cityTitle = cityTitle;
+    }
+
+    public static void setCityTag(String cityTag) {
+        addCityActivity.cityTag = cityTag;
+    }
+
+    public static String getCityTitle() {
+        return cityTitle;
+    }
+
+    public static String getCityTag() {
+        return cityTag;
+    }
 
     //spinner maker
     /**
@@ -58,30 +76,18 @@ public class addCityActivity extends AppCompatActivity {
         public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
             String cityTitle = (String)adapterView.getItemAtPosition(i);
             String cityTag = returnList().get(i).get(cityTitle);
-            Toast.makeText(addCityActivity.this, cityTitle + cityTag, Toast.LENGTH_SHORT).show(); //Test Done
-            OnBtnClickListener listener = new OnBtnClickListener(cityTitle, cityTag);
+
+            /**
+             * test
+             */
+            Toast.makeText(addCityActivity.this, cityTitle + "と" + cityTag + "が選択されました", Toast.LENGTH_SHORT).show(); //値がきてますテスト
+            setCityTitle(cityTitle);
+            setCityTag(cityTag);
+//            OnBtnClickListener listener = new OnBtnClickListener(cityTitle, cityTag);
         }
     }
 
     private class OnBtnClickListener implements View.OnClickListener {
-        private String cityTitle;
-        private String cityTag;
-
-        public OnBtnClickListener() {
-        }
-
-        public OnBtnClickListener(String cityTitle, String cityTag) {
-            this.cityTitle = cityTitle;
-            this.cityTag = cityTag;
-        }
-
-        public String getCityTitle() {
-            return cityTitle;
-        }
-
-        public String getCityTag() {
-            return cityTag;
-        }
 
         @Override
         public void onClick(View view) {
