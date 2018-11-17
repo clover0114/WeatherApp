@@ -1,10 +1,16 @@
 package com.example.clover.weatherapp;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Xml;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -17,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 public class addCityActivity extends AppCompatActivity {
+
 
     //spinner maker
     /**
@@ -35,6 +42,55 @@ public class addCityActivity extends AppCompatActivity {
         }
         ArrayAdapter<String> adapter = new ArrayAdapter<>(addCityActivity.this, android.R.layout.simple_spinner_item, cityNames);
         spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(new OnItemSelected());
+
+        Button bt = findViewById(R.id.button);
+        bt.setOnClickListener(new OnBtnClickListener());
+    }
+
+    //リストを選択すると、ボタンリスナーのフィールドに取得した値を格納する
+    private class OnItemSelected implements AdapterView.OnItemSelectedListener {
+        @Override
+        public void onNothingSelected(AdapterView<?> adapterView) {
+        }
+
+        @Override
+        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+            String cityTitle = (String)adapterView.getItemAtPosition(i);
+            String cityTag = returnList().get(i).get(cityTitle);
+            Toast.makeText(addCityActivity.this, cityTitle + cityTag, Toast.LENGTH_SHORT).show(); //Test Done
+            OnBtnClickListener listener = new OnBtnClickListener(cityTitle, cityTag);
+        }
+    }
+
+    private class OnBtnClickListener implements View.OnClickListener {
+        private String cityTitle;
+        private String cityTag;
+
+        public OnBtnClickListener() {
+        }
+
+        public OnBtnClickListener(String cityTitle, String cityTag) {
+            this.cityTitle = cityTitle;
+            this.cityTag = cityTag;
+        }
+
+        public String getCityTitle() {
+            return cityTitle;
+        }
+
+        public String getCityTag() {
+            return cityTag;
+        }
+
+        @Override
+        public void onClick(View view) {
+            Intent intent = getIntent();
+            intent.putExtra("cityTitle", getCityTitle());
+            intent.putExtra("cityTag", getCityTag());
+            setResult(Activity.RESULT_OK, intent);
+            finish();
+        }
     }
 
     /**
@@ -419,6 +475,7 @@ public class addCityActivity extends AppCompatActivity {
                 "</channel>\n" +
                 "</rss>";
     }
+
 
 }
 
