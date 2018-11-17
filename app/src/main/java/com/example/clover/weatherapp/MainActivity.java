@@ -16,6 +16,7 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -32,36 +33,47 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     private final int REQUEST_CODE_ADDCITY = 0;
-    ListView lv_preflist = findViewById(R.id.lv_preflist);
     List<Map<String, String>> cityList = new ArrayList<>();
+    Map<String, String> city = new HashMap<>();
+    private String cityTitle = null;
+    private String cityTag = null;
+
+    public String getCityTitle() {
+        return cityTitle;
+    }
+
+    public String getCityTag() {
+        return cityTag;
+    }
+
+    public void setCityTitle(String cityTitle) {
+        this.cityTitle = cityTitle;
+    }
+
+    public void setCityTag(String cityTag) {
+        this.cityTag = cityTag;
+    }
 
     public int getREQUEST_CODE_ADDCITY() {
         return REQUEST_CODE_ADDCITY;
     }
 
-    //空のリストを生成
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
-        String[] from = {"cityName"};
-        int[] to = {android.R.id.text1};
-        SimpleAdapter adapter = new SimpleAdapter(MainActivity.this, cityList, android.R.layout.simple_expandable_list_item_1, from, to);
-        lv_preflist.setAdapter(adapter);
-        lv_preflist.setOnItemClickListener(new onListItemSelectedListener());
+        Toast.makeText(this, "onCreate()", Toast.LENGTH_SHORT).show();
+        listGenerator();
     }
 
-    //addCityActivityからの戻りを受け取ったら、リストに都市を追加
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (requestCode == getREQUEST_CODE_ADDCITY() && resultCode == Activity.RESULT_OK){
-            Bundle extras = data.getExtras();
-
-            Map<String, String> city = new HashMap<>();
-            city.put("cityTitle", extras.getString("cityTitle"));
-            city.put("cityTag", extras.getString("cityTag"));
+    //フィールドに値が存在すれば都市リストを生成
+    private void listGenerator(){
+        if (getCityTitle() != null && getCityTag() != null){
+            ListView lv_preflist = findViewById(R.id.lv_preflist);
+            city = new HashMap<>();
+            city.put("cityTitle", getCityTitle());
+            city.put("cityTag", getCityTag());
             cityList.add(city);
 
             String[] from = {"cityName"};
@@ -69,11 +81,34 @@ public class MainActivity extends AppCompatActivity {
             SimpleAdapter adapter = new SimpleAdapter(MainActivity.this, cityList, android.R.layout.simple_expandable_list_item_1, from, to);
             lv_preflist.setAdapter(adapter);
             lv_preflist.setOnItemClickListener(new onListItemSelectedListener());
+            Toast.makeText(this, "listGenerator()", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, getCityTitle()
+                    + "と" + getCityTag() + "が選択されました", Toast.LENGTH_SHORT).show(); //値がきてますテスト
+        }
+    }
+
+    //addCityActivityからの戻りを受け取ったら、フィールドに値を格納(UIThreadでないとリストの内容を変更できない？) ? アクティビティを起動？
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == getREQUEST_CODE_ADDCITY() && resultCode == Activity.RESULT_OK){
+            Bundle extras = data.getExtras();
+            String cityTitle = extras.getString("cityTitle");
+            String cityTag = extras.getString("cityTag");
+
+//            Intent intent = new Intent(this, MainActivity.class);
+//            intent.putExtra("cityTitle", cityTitle);
+//            intent.putExtra("cityTitle", cityTag);
+//            startActivity(intent);
+
+            setCityTitle(cityTitle);
+            setCityTag(cityTag);
+
+            listGenerator();
 
             /**
              * test
              */
-            Toast.makeText(this, "onActivityResult", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "onActivityResult()", Toast.LENGTH_SHORT).show();
             Toast.makeText(MainActivity.this, extras.getString("cityTitle")
                     + "と" + extras.getString("cityTag") + "が選択されました", Toast.LENGTH_SHORT).show(); //値がきてますテスト
         }
@@ -120,10 +155,10 @@ public class MainActivity extends AppCompatActivity {
             InputStream is = null;
             String result = "";
             String cityTag = strings[0];
-            String urlStr = "http://weather.livedoor.com/forecast/webservice/json/v1?city=";
+            String urlStr = "http://weather.livedoor.com/forecast/webservice/json/v1?city=" + cityTag;
 
             try {
-                URL url = new URL(urlStr + cityTag);
+                URL url = new URL(urlStr);
                 con = (HttpURLConnection) url.openConnection();
                 con.setRequestMethod("GET");
                 con.connect();
@@ -133,9 +168,13 @@ public class MainActivity extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
-                con.disconnect();
+                if (con != null) {
+                    con.disconnect();
+                }
                 try {
-                    is.close();
+                    if (is != null) {
+                        is.close();
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -156,7 +195,7 @@ public class MainActivity extends AppCompatActivity {
                 JSONObject rootJSON = new JSONObject(result);
 
                 cityTitle = rootJSON.getJSONObject("location").getString("city");
-                cityTelop = rootJSON.getJSONArray("forecasts").getString(0);
+                cityTelop = rootJSON.getJSONArray("forecasts").getJSONObject(1).getString("telop");
                 cityDesc = rootJSON.getJSONObject("description").getString("text");
             } catch (JSONException e) {
                 e.printStackTrace();

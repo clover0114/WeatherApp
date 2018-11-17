@@ -80,6 +80,7 @@ public class addCityActivity extends AppCompatActivity {
             /**
              * test
              */
+            Toast.makeText(addCityActivity.this, "onItemSelected()", Toast.LENGTH_SHORT).show();
             Toast.makeText(addCityActivity.this, cityTitle + "と" + cityTag + "が選択されました", Toast.LENGTH_SHORT).show(); //値がきてますテスト
             setCityTitle(cityTitle);
             setCityTag(cityTag);
