@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
             city.put("cityTag", getCityTag());
             cityList.add(city);
 
-            String[] from = {"cityName"};
+            String[] from = {"cityTitle"};
             int[] to = {android.R.id.text1};
             SimpleAdapter adapter = new SimpleAdapter(MainActivity.this, cityList, android.R.layout.simple_expandable_list_item_1, from, to);
             lv_preflist.setAdapter(adapter);
