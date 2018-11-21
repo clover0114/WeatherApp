@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -32,13 +33,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * todo データ保存
- * todo どんな時にデータ保存するか > データ追加された時、Preferenceで
+ * TODO: Activityが停止された時、onSaveInstanceStateで値を保存
+ * TODO: [need fix]Listが生成されない
+ * TODO: Spinnerの表示を大きくする
  */
 public class MainActivity extends AppCompatActivity {
     private final int REQUEST_CODE_ADDCITY = 0;
     private List<Map<String, String>> cityList = new ArrayList<>();
-    private Map<String, String> cityMap = new HashMap<>();
+
     private ArrayList<String> cityTitle = new ArrayList<>();
     private ArrayList<String> cityTag = new ArrayList<>();
 
@@ -75,15 +77,16 @@ public class MainActivity extends AppCompatActivity {
      * TODO: それぞれのgetter setterを設置 > arrayListはgetter.add / getter.getのみですんだ！
      */
     private void listGenerator(){
-//
-        if (0 < getCityTitle().size()){
+        Log.d("log","listgenerator()");
+        if (1 <= getCityTitle().size()){
             ListView lv_preflist = findViewById(R.id.lv_preflist);
-
-            for (int i = 1; i <= cityList.size(); i++) {
-                cityMap = new HashMap<>();
+            Log.d("log","listgenerator() > if()");
+            for (int i = 1; i <= getCityTitle().size(); i++) { //ここのint i;は、1でないといけない。なぜならgetCityTitle()はaddされたとき、indexの1から足されるから。
+                Log.d("log","listgenerator() > if() > for()");
+                Map<String, String> cityMap = new HashMap<>();
                 cityMap.put("cityTitle", getCityTitle().get(i));
                 cityMap.put("cityTag", getCityTag().get(i));
-                cityList.add(cityMap);
+                getCityList().add(cityMap);
             }
 
             String[] from = {"cityTitle"};
@@ -102,11 +105,7 @@ public class MainActivity extends AppCompatActivity {
             String cityTitle = extras.getString("cityTitle");
             String cityTag = extras.getString("cityTag");
 
-            // TODO: setArray...
             //値をフィールドにセット
-            /**
-             * 注意: ArrayList.add()は、indexを指定しない限り、Listの"最後"に値を追加する
-             */
             getCityTitle().add(cityTitle);
             getCityTag().add(cityTag);
 
@@ -218,6 +217,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //Activity保持
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         //Activityが停止し始めたら、cityList可変長配列を保存する
@@ -229,16 +229,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
+        //すでに何か保存されている場合は...
         if (savedInstanceState != null){
             //TODO: 保存しておいた配列から取り出した数値を一つずつフィールドの配列に入れ直す
             //保存しておいた配列
             List<String> savedTitlesArray = savedInstanceState.getStringArrayList("cityTitleList");
             List<String> savedTagsArray = savedInstanceState.getStringArrayList("cityTagList");
-            for (int i = 0; i <= savedTitlesArray.size(); i++) {
+            for (int i = 1; i <= savedTitlesArray.size(); i++) {
                 getCityTitle().add(savedTitlesArray.get(i));
                 getCityTag().add(savedTagsArray.get(i));
             }
-
         }
     }
 }
