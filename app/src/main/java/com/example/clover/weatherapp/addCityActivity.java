@@ -77,14 +77,10 @@ public class addCityActivity extends AppCompatActivity {
             String cityTitle = (String)adapterView.getItemAtPosition(i);
             String cityTag = returnList().get(i).get(cityTitle);
 
-            /**
-             * test
-             */
-            Toast.makeText(addCityActivity.this, "onItemSelected()", Toast.LENGTH_SHORT).show();
-            Toast.makeText(addCityActivity.this, cityTitle + "と" + cityTag + "が選択されました", Toast.LENGTH_SHORT).show(); //値がきてますテスト
+//            Toast.makeText(addCityActivity.this, "onItemSelected()", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(addCityActivity.this, cityTitle + "と" + cityTag + "が選択されました", Toast.LENGTH_SHORT).show();
             setCityTitle(cityTitle);
             setCityTag(cityTag);
-//            OnBtnClickListener listener = new OnBtnClickListener(cityTitle, cityTag);
         }
     }
 
@@ -105,10 +101,7 @@ public class addCityActivity extends AppCompatActivity {
      * @return List<LinkedHashMap<cityTitle, cityTag>>
      */
 
-    /** WANT
-     * XML parse <pref title></pref>の塊で取り出すメソッド
-     * @return
-     */
+    //todo XML parse <pref title></pref>の塊で取り出すメソッドが欲しい
     private List<Map<String, String>> returnList() {
         List<Map<String, String>> cityList = new ArrayList<>();
 

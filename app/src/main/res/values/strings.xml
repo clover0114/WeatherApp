@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">WeatherApp</string>
-    <string name="tv_pref_title">宮崎県</string>
+    <string name="tv_pref_title">選択した都市名</string>
     <string name="tv_pref_title_context">の天気</string>
-    <string name="tv_pref_weather">はれ</string>
+    <string name="tv_pref_weather">天気</string>
     <string name="tv_pref_weather_desc">天気概況文</string>
 
     <string name="tv_desc_add">リストに追加する都市を選んでください</string>

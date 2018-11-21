@@ -31,27 +31,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * todo データ保存
+ * todo どんな時にデータ保存するか > データ追加された時、Preferenceで
+ */
 public class MainActivity extends AppCompatActivity {
     private final int REQUEST_CODE_ADDCITY = 0;
-    List<Map<String, String>> cityList = new ArrayList<>();
-    Map<String, String> city = new HashMap<>();
-    private String cityTitle = null;
-    private String cityTag = null;
+    private List<Map<String, String>> cityList = new ArrayList<>();
+    private Map<String, String> cityMap = new HashMap<>();
+    private ArrayList<String> cityTitle = new ArrayList<>();
+    private ArrayList<String> cityTag = new ArrayList<>();
 
-    public String getCityTitle() {
+    public List<Map<String, String>> getCityList() {
+        return cityList;
+    }
+
+    public ArrayList<String> getCityTitle() {
         return cityTitle;
     }
 
-    public String getCityTag() {
+    public ArrayList<String> getCityTag() {
         return cityTag;
-    }
-
-    public void setCityTitle(String cityTitle) {
-        this.cityTitle = cityTitle;
-    }
-
-    public void setCityTag(String cityTag) {
-        this.cityTag = cityTag;
     }
 
     public int getREQUEST_CODE_ADDCITY() {
@@ -63,31 +63,38 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toast.makeText(this, "onCreate()", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, "onCreate()", Toast.LENGTH_SHORT).show();
+
         listGenerator();
     }
 
-    //フィールドに値が存在すれば都市リストを生成
+    //都市リストを生成
+    /**
+     * TODO: リストに値を追加する前にPreferenceファイルにデータを保存
+     * TODO: cityTitle, cityTagをArrayListに変更
+     * TODO: それぞれのgetter setterを設置 > arrayListはgetter.add / getter.getのみですんだ！
+     */
     private void listGenerator(){
-        if (getCityTitle() != null && getCityTag() != null){
+//
+        if (0 < getCityTitle().size()){
             ListView lv_preflist = findViewById(R.id.lv_preflist);
-            city = new HashMap<>();
-            city.put("cityTitle", getCityTitle());
-            city.put("cityTag", getCityTag());
-            cityList.add(city);
+
+            for (int i = 1; i <= cityList.size(); i++) {
+                cityMap = new HashMap<>();
+                cityMap.put("cityTitle", getCityTitle().get(i));
+                cityMap.put("cityTag", getCityTag().get(i));
+                cityList.add(cityMap);
+            }
 
             String[] from = {"cityTitle"};
             int[] to = {android.R.id.text1};
-            SimpleAdapter adapter = new SimpleAdapter(MainActivity.this, cityList, android.R.layout.simple_expandable_list_item_1, from, to);
+            SimpleAdapter adapter = new SimpleAdapter(MainActivity.this, getCityList(), android.R.layout.simple_expandable_list_item_1, from, to);
             lv_preflist.setAdapter(adapter);
             lv_preflist.setOnItemClickListener(new onListItemSelectedListener());
-            Toast.makeText(this, "listGenerator()", Toast.LENGTH_SHORT).show();
-            Toast.makeText(MainActivity.this, getCityTitle()
-                    + "と" + getCityTag() + "が選択されました", Toast.LENGTH_SHORT).show(); //値がきてますテスト
         }
     }
 
-    //addCityActivityからの戻りを受け取ったら、フィールドに値を格納(UIThreadでないとリストの内容を変更できない？) ? アクティビティを起動？
+    //addCityActivityからの戻りを受け取る
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (requestCode == getREQUEST_CODE_ADDCITY() && resultCode == Activity.RESULT_OK){
@@ -95,22 +102,15 @@ public class MainActivity extends AppCompatActivity {
             String cityTitle = extras.getString("cityTitle");
             String cityTag = extras.getString("cityTag");
 
-//            Intent intent = new Intent(this, MainActivity.class);
-//            intent.putExtra("cityTitle", cityTitle);
-//            intent.putExtra("cityTitle", cityTag);
-//            startActivity(intent);
-
-            setCityTitle(cityTitle);
-            setCityTag(cityTag);
+            // TODO: setArray...
+            //値をフィールドにセット
+            /**
+             * 注意: ArrayList.add()は、indexを指定しない限り、Listの"最後"に値を追加する
+             */
+            getCityTitle().add(cityTitle);
+            getCityTag().add(cityTag);
 
             listGenerator();
-
-            /**
-             * test
-             */
-            Toast.makeText(this, "onActivityResult()", Toast.LENGTH_SHORT).show();
-            Toast.makeText(MainActivity.this, extras.getString("cityTitle")
-                    + "と" + extras.getString("cityTag") + "が選択されました", Toast.LENGTH_SHORT).show(); //値がきてますテスト
         }
     }
 
@@ -215,6 +215,30 @@ public class MainActivity extends AppCompatActivity {
                 sb.append(b, 0, line);
             }
             return sb.toString();
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        //Activityが停止し始めたら、cityList可変長配列を保存する
+        super.onSaveInstanceState(outState);
+        outState.putStringArrayList("cityTitleList", getCityTitle());
+        outState.putStringArrayList("cityTagList", getCityTag());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState != null){
+            //TODO: 保存しておいた配列から取り出した数値を一つずつフィールドの配列に入れ直す
+            //保存しておいた配列
+            List<String> savedTitlesArray = savedInstanceState.getStringArrayList("cityTitleList");
+            List<String> savedTagsArray = savedInstanceState.getStringArrayList("cityTagList");
+            for (int i = 0; i <= savedTitlesArray.size(); i++) {
+                getCityTitle().add(savedTitlesArray.get(i));
+                getCityTag().add(savedTagsArray.get(i));
+            }
+
         }
     }
 }
