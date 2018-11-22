@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * TODO: リストをスクロールビューに格納する
  * TODO: Spinnerの表示を大きくする
  */
 public class MainActivity extends AppCompatActivity {
@@ -65,29 +66,47 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 //        Toast.makeText(this, "onCreate()", Toast.LENGTH_SHORT).show();
 
-        listGenerator();
+        listGenerator(1);
     }
 
+    // TODO: [need fix]2度目以降の都市追加で、1度のリスト生成で複数の都市がリスト生成されてしまう
+    /**
+     * TODO: 2度目以降、cityTitleのサイズが2,3,4...と増えていくため、その分のリストを生成してしまう。onActivityResult()で追加する場合と、そうでない場合などで、listGenerator()に引数を作ってみる？
+     * TODO: 引数を作る？ メソッド内で条件分岐を作る？
+     * TODO: 引数+メソッド内で条件分岐を作ることにする > その場合、onActivityResultから呼ばれた時は、getCityTitle()の最後の値だけをputすればよい？
+     */
     //都市リストを生成
-    private void listGenerator(){
-        Log.d("log","listgenerator()");
-        if (0 <  getCityTitle().size()){
-            ListView lv_preflist = findViewById(R.id.lv_preflist);
-            Log.d("log","listgenerator() > if()");
-            for (int i = 0; i < getCityTitle().size(); i++) {
-                Log.d("log","listgenerator() > if() > for()");
-                Map<String, String> cityMap = new HashMap<>();
-                cityMap.put("cityTitle", getCityTitle().get(i));
-                cityMap.put("cityTag", getCityTag().get(i));
-                getCityList().add(cityMap);
+    private void listGenerator(int selectNum){
+        ListView lv_preflist = findViewById(R.id.lv_preflist);
+        Map<String, String> cityMap;
+        //cityTitleリストに値が入っている場合のみ
+        if (0 <  getCityTitle().size()) {
+            switch (selectNum) {
+                case 0: //onActivityResult()に渡されたもののみ生成
+                    int index = getCityTitle().size() - 1; //最後に追加された値
+                    cityMap = new HashMap<>();
+                    cityMap.put("cityTitle", getCityTitle().get(index));
+                    cityMap.put("cityTag", getCityTag().get(index));
+                    getCityList().add(cityMap);
+                    break;
+
+                case 1: //cityTitle配列分全て生成
+                    for (int i = 0; i < getCityTitle().size(); i++) {
+                        cityMap = new HashMap<>();
+                        cityMap.put("cityTitle", getCityTitle().get(i));
+                        cityMap.put("cityTag", getCityTag().get(i));
+                        getCityList().add(cityMap);
+                    break;
+                }
             }
+        }
 
             String[] from = {"cityTitle"};
             int[] to = {android.R.id.text1};
             SimpleAdapter adapter = new SimpleAdapter(MainActivity.this, getCityList(), android.R.layout.simple_expandable_list_item_1, from, to);
             lv_preflist.setAdapter(adapter);
             lv_preflist.setOnItemClickListener(new onListItemSelectedListener());
-        }
+
     }
 
     //addCityActivityからの戻りを受け取る
@@ -102,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
             getCityTitle().add(cityTitle);
             getCityTag().add(cityTag);
 
-            listGenerator();
+            listGenerator(0);
         }
     }
 
@@ -210,10 +229,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * TODO: Activity停止かつ、cityTitle, cityListに値が存在すれば保存
-     * @param outState
-     */
     //Activity保持
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -226,9 +241,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * TODO: addall
-     * TODO: if
-     * TODO: debugger使い方
+     * TODO: [need fix]onRestoreInstanceStateが呼ばれない？
      * @param savedInstanceState
      */
     @Override
@@ -243,7 +256,7 @@ public class MainActivity extends AppCompatActivity {
                 getCityTitle().addAll(savedTitlesArray);
                 getCityTag().addAll(savedTagsArray);
 
-                listGenerator();
+                listGenerator(1);
             }
         }
     }
