@@ -65,16 +65,19 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 //        Toast.makeText(this, "onCreate()", Toast.LENGTH_SHORT).show();
+        if (savedInstanceState != null){
+            if (0 < getCityTitle().size() && 0 < getCityTag().size()) {
+                //保存しておいた配列 > addAllでフィールド配列に入れ直す
+                List<String> savedTitlesArray = savedInstanceState.getStringArrayList("cityTitleList");
+                List<String> savedTagsArray = savedInstanceState.getStringArrayList("cityTagList");
+                getCityTitle().addAll(savedTitlesArray);
+                getCityTag().addAll(savedTagsArray);
 
-        listGenerator(1);
+                listGenerator(1);
+            }
+        }
     }
 
-    // TODO: [need fix]2度目以降の都市追加で、1度のリスト生成で複数の都市がリスト生成されてしまう
-    /**
-     * TODO: 2度目以降、cityTitleのサイズが2,3,4...と増えていくため、その分のリストを生成してしまう。onActivityResult()で追加する場合と、そうでない場合などで、listGenerator()に引数を作ってみる？
-     * TODO: 引数を作る？ メソッド内で条件分岐を作る？
-     * TODO: 引数+メソッド内で条件分岐を作ることにする > その場合、onActivityResultから呼ばれた時は、getCityTitle()の最後の値だけをputすればよい？
-     */
     //都市リストを生成
     private void listGenerator(int selectNum){
         ListView lv_preflist = findViewById(R.id.lv_preflist);
