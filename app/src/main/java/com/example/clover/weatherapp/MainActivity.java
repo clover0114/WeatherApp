@@ -33,8 +33,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * TODO: Activityが停止された時、onSaveInstanceStateで値を保存
- * TODO: [need fix]Listが生成されない
  * TODO: Spinnerの表示を大きくする
  */
 public class MainActivity extends AppCompatActivity {
@@ -71,17 +69,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //都市リストを生成
-    /**
-     * TODO: リストに値を追加する前にPreferenceファイルにデータを保存
-     * TODO: cityTitle, cityTagをArrayListに変更
-     * TODO: それぞれのgetter setterを設置 > arrayListはgetter.add / getter.getのみですんだ！
-     */
     private void listGenerator(){
         Log.d("log","listgenerator()");
-        if (1 <= getCityTitle().size()){
+        if (0 <  getCityTitle().size()){
             ListView lv_preflist = findViewById(R.id.lv_preflist);
             Log.d("log","listgenerator() > if()");
-            for (int i = 1; i <= getCityTitle().size(); i++) { //ここのint i;は、1でないといけない。なぜならgetCityTitle()はaddされたとき、indexの1から足されるから。
+            for (int i = 0; i < getCityTitle().size(); i++) {
                 Log.d("log","listgenerator() > if() > for()");
                 Map<String, String> cityMap = new HashMap<>();
                 cityMap.put("cityTitle", getCityTitle().get(i));
@@ -217,27 +210,40 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * TODO: Activity停止かつ、cityTitle, cityListに値が存在すれば保存
+     * @param outState
+     */
     //Activity保持
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         //Activityが停止し始めたら、cityList可変長配列を保存する
         super.onSaveInstanceState(outState);
-        outState.putStringArrayList("cityTitleList", getCityTitle());
-        outState.putStringArrayList("cityTagList", getCityTag());
+        if (0 < getCityTitle().size() && 0 < getCityTag().size()) {
+            outState.putStringArrayList("cityTitleList", getCityTitle());
+            outState.putStringArrayList("cityTagList", getCityTag());
+        }
     }
 
+    /**
+     * TODO: addall
+     * TODO: if
+     * TODO: debugger使い方
+     * @param savedInstanceState
+     */
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        //すでに何か保存されている場合は...
+        //すでに何か保存されている場合、cityTitleとcityTagはサイズ1以上、その場合のみActivity復元
         if (savedInstanceState != null){
-            //TODO: 保存しておいた配列から取り出した数値を一つずつフィールドの配列に入れ直す
-            //保存しておいた配列
-            List<String> savedTitlesArray = savedInstanceState.getStringArrayList("cityTitleList");
-            List<String> savedTagsArray = savedInstanceState.getStringArrayList("cityTagList");
-            for (int i = 1; i <= savedTitlesArray.size(); i++) {
-                getCityTitle().add(savedTitlesArray.get(i));
-                getCityTag().add(savedTagsArray.get(i));
+            if (0 < getCityTitle().size() && 0 < getCityTag().size()) {
+                //保存しておいた配列 > addAllでフィールド配列に入れ直す
+                List<String> savedTitlesArray = savedInstanceState.getStringArrayList("cityTitleList");
+                List<String> savedTagsArray = savedInstanceState.getStringArrayList("cityTagList");
+                getCityTitle().addAll(savedTitlesArray);
+                getCityTag().addAll(savedTagsArray);
+
+                listGenerator();
             }
         }
     }
